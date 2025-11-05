@@ -1,0 +1,31 @@
+USE finance_tracker;
+GO
+
+SELECT * FROM reminders;
+SELECT * FROM expenses;
+
+CREATE TABLE reminders(
+id INT IDENTITY(1,1) PRIMARY KEY,
+title NVARCHAR(MAX) NOT NULL,
+content NVARCHAR(MAX) NOT NULL,
+);
+GO
+
+UPDATE TABLE reminders
+
+CREATE TABLE expenses (
+id INT IDENTITY(1,1) PRIMARY KEY,
+amount DECIMAL(10,2) NOT NULL,
+note NVARCHAR(MAX) NULL,
+datespent DATETIME DEFAULT GETDATE() NOT NULL
+);
+
+INSERT INTO reminders (title, content) VALUES ('Test', 'This is a test');
+SELECT * FROM reminders;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON reminders TO node_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON expenses TO node_user;
+
+SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME='reminders';
