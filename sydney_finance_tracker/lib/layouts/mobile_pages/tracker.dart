@@ -57,7 +57,7 @@ class _TrackerState extends State<Tracker> {
             e['purchase']
                 .toLowerCase()
                 .contains(_searchController.text.toLowerCase());
-        final date = DateTime.parse(e['date']);
+        final date = DateTime.parse(e['date']).toLocal();
 
         final startMatch = _startDate == null ||
             date.isAfter(_startDate!.subtract(const Duration(days: 1)));
@@ -258,7 +258,7 @@ class _TrackerState extends State<Tracker> {
                           "${e['category']} - ${e['purchase']} - \$${e['amount'].toStringAsFixed(2)}"),
                       subtitle: Text(e['note'] ?? ''),
                       trailing: Text(
-                        "${DateTime.parse(e['date']).month}/${DateTime.parse(e['date']).day}/${DateTime.parse(e['date']).year}",
+                        "${DateTime.parse(e['date']).toLocal().month}/${DateTime.parse(e['date']).toLocal().day}/${DateTime.parse(e['date']).toLocal().year}",
                         style: TextStyle(color: Colors.grey[600]),
                       ),
                     ),

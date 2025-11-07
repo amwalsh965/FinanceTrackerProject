@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sydney_finance_tracker/layouts/mobile_pages/graph.dart';
 import 'package:sydney_finance_tracker/layouts/mobile_pages/reminder.dart';
 import 'package:sydney_finance_tracker/layouts/mobile_pages/tracker.dart';
 import 'package:sydney_finance_tracker/styles/app_styles.dart';
@@ -122,8 +123,12 @@ class _HomeState extends State<Home> {
               context,
               label: "Graphs",
               icon: Icons.auto_graph_rounded,
-              onPressed: () {
-                print("Mobile Button Tapped");
+              onPressed: () async {
+                final expenses = await api.getExpenses(null);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => GraphsPage(expenses: expenses)));
               },
             ),
             _buildResponsiveBtn(
