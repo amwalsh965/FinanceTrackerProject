@@ -29,6 +29,28 @@ class _HomeState extends State<Home> {
     });
   }
 
+  Widget _buildResponsiveBtn(
+    BuildContext context, {
+    required String label,
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double cellWidth = constraints.maxWidth;
+        double iconSize = cellWidth * 0.5;
+        double textSize = cellWidth * 0.2;
+
+        return MenuButton(
+          label: label,
+          icon: Icon(icon, size: iconSize),
+          textStyle: TextStyle(fontSize: textSize),
+          onPressed: onPressed,
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -84,8 +106,10 @@ class _HomeState extends State<Home> {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           children: [
-            MenuButton(
+            _buildResponsiveBtn(
+              context,
               label: "Tracker",
+              icon: Icons.attach_money_rounded,
               onPressed: () {
                 Navigator.push(
                   context,
@@ -93,28 +117,30 @@ class _HomeState extends State<Home> {
                 );
                 print("Mobile Button Tapped");
               },
-              icon: Icon(Icons.attach_money_rounded, size: AppStyles.iconSize),
             ),
-            MenuButton(
+            _buildResponsiveBtn(
+              context,
               label: "Graphs",
+              icon: Icons.auto_graph_rounded,
               onPressed: () {
                 print("Mobile Button Tapped");
               },
-              icon: Icon(Icons.auto_graph_rounded, size: AppStyles.iconSize),
             ),
-            MenuButton(
+            _buildResponsiveBtn(
+              context,
               label: "Goals",
+              icon: Icons.menu_book_rounded,
               onPressed: () {
                 print("Mobile Button Tapped");
               },
-              icon: Icon(Icons.menu_book_rounded, size: AppStyles.iconSize),
             ),
-            MenuButton(
+            _buildResponsiveBtn(
+              context,
               label: "Other",
+              icon: Icons.question_mark_rounded,
               onPressed: () {
                 print("Mobile Button Tapped");
               },
-              icon: Icon(Icons.question_mark_rounded, size: AppStyles.iconSize),
             ),
           ],
         ),

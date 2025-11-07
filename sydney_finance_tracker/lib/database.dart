@@ -24,7 +24,10 @@ class ApiService {
     final response = await http.post(
       Uri.parse('$baseUrl/expenses'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(expense),
+      body: jsonEncode({
+        ...expense,
+        'date': (expense['date'] as DateTime).toIso8601String(),
+      }),
     );
 
     if (response.statusCode == 200) {
@@ -37,9 +40,13 @@ class ApiService {
   Future<Map<String, dynamic>> updateExpense(
       Map<String, dynamic> expense) async {
     final response = await http.put(
-        Uri.parse('$baseUrl/expenses/${expense["id"]}'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(expense));
+      Uri.parse('$baseUrl/expenses/${expense["id"]}'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        ...expense,
+        'date': (expense['date'] as DateTime).toIso8601String(),
+      }),
+    );
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
@@ -94,11 +101,6 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(reminder),
     );
-    print(response);
-    print(response.statusCode);
-    print(response.headers);
-    print(response.body);
-    print("add reminder");
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {

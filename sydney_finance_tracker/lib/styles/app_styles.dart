@@ -19,6 +19,7 @@ class AppStyles {
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(10),
     ),
+    padding: const EdgeInsets.symmetric(vertical: 16),
     foregroundColor: _menuButtonForegroundColor,
     backgroundColor: _menuButtonBackgroundColor,
   ).copyWith(

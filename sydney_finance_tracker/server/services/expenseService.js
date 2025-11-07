@@ -18,27 +18,29 @@ class ExpenseService {
     }
 
     async add(expense) {
-        const {amount, category, note, date } = expense;
+        const {amount, purchase, category, note, date } = expense;
         const result = await this.pool.request()
             .input("amount", sql.Float, amount)
+            .input("purchase", sql.VarChar(255), purchase)
             .input("category", sql.VarChar, category)
             .input("note", sql.VarChar, note)
             .input("date", sql.DateTime, new Date(date))
-            .query("INSERT INTO expenses (amount, category, note, date) VALUES (@amount, @category, @note, @date)");
+            .query("INSERT INTO expenses (amount, purchase, category, note, date) OUTPUT INSERTED.* VALUES (@amount, @purchase, @category, @note, @date)");
             return result.recordset[0];
 
     }
 
     async update(id, expense) {
-        const {amount, category, note, date } = expense;
+        const {amount, purchase, category, note, date } = expense;
         const result = await this.pool.request()
         .input('id', sql.Int, id)
         .input('amount', sql.Float, amount)
+        .input('purchase', sql.VarChar(255), purchase)
         .input('category', sql.VarChar, category)
         .input('note', sql.VarChar, note)
         .input('date', sql.DateTime, date)
         .query(`UPDATE expenses
-            SET amount=@amount, category=@category, note=@note, date=@date WHERE id=@id; SELECT * FROM expenses WHERE id=@id;`
+            SET amount=@amount, purchase=@purchase, category=@category, note=@note, date=@date OUTPUT INSERTED.* WHERE id=@id; SELECT * FROM expenses WHERE id=@id;`
         );
         return result.recordset[0];
     }
