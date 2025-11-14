@@ -28,6 +28,11 @@ class _ReminderState extends State<Reminder> {
     });
   }
 
+  // Future<void> _loadGoals() async {
+  //   final data = await api.getGoals(null);
+  //   setState(() => goals = data);
+  // }
+
   Future<void> _navigateToEditReminder(bool create, {int id = 0}) async {
     final (reminder, deleted) = await Navigator.push(
       context,
@@ -102,7 +107,7 @@ class ReminderBox extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
+          const Text(
             "Reminders",
             style: TextStyle(
               fontSize: 25,
@@ -208,13 +213,21 @@ class _EditReminderState extends State<EditReminder> {
   TextEditingController _titleController = TextEditingController();
   TextEditingController _contentController = TextEditingController();
   final api = ApiService();
+  List<Map<String, dynamic>> goals = [];
+  String? _selectedGoalId;
 
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController();
-    _contentController = TextEditingController();
+    // _titleController = TextEditingController();
+    // _contentController = TextEditingController();
+    _loadGoals();
     _loadReminder();
+  }
+
+  Future<void> _loadGoals() async {
+    final data = await api.getGoals(null);
+    setState(() => goals = data);
   }
 
   void _loadReminder() async {
@@ -227,11 +240,7 @@ class _EditReminderState extends State<EditReminder> {
         setState(() {
           _titleController.text = firstReminder["title"] ?? "";
           _contentController.text = firstReminder["content"] ?? "";
-        });
-      } else {
-        setState(() {
-          _titleController.text = '';
-          _contentController.text = '';
+          _selectedGoalId = firstReminder["goal_id"];
         });
       }
     }
@@ -250,6 +259,8 @@ class _EditReminderState extends State<EditReminder> {
     Map<String, dynamic> reminder = {
       'title': _titleController.text,
       'content': _contentController.text,
+      'goal_id':
+          _selectedGoalId != null ? int.tryParse(_selectedGoalId!) : null,
       if (!widget.created) 'id': widget.id
     };
 
@@ -260,6 +271,7 @@ class _EditReminderState extends State<EditReminder> {
     final reminder = {
       'title': _titleController.text,
       'content': _contentController.text,
+      'goal_id': _selectedGoalId,
       'id': widget.id,
     };
     Navigator.pop(context, (reminder, true));
@@ -282,6 +294,24 @@ class _EditReminderState extends State<EditReminder> {
             TextField(
               controller: _contentController,
               decoration: const InputDecoration(labelText: "Context"),
+            ),
+            const SizedBox(height: 20),
+            DropdownButtonFormField<String?>(
+              value: _selectedGoalId,
+              decoration: const InputDecoration(labelText: "Associated Goal"),
+              items: [
+                const DropdownMenuItem<String?>(
+                    value: null, child: Text("No Goal")),
+                ...goals.map((goal) => DropdownMenuItem<String?>(
+                      value: goal["id"].toString(),
+                      child: Text(goal["name"]),
+                    )),
+              ],
+              onChanged: (String? value) {
+                setState(() {
+                  _selectedGoalId = value;
+                });
+              },
             ),
             const SizedBox(height: 20),
             Row(
@@ -323,6 +353,13 @@ class ReminderInd extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String goalText = "";
+    if (reminder["spending_goal"] != null) {
+      goalText = reminder["category_id"]
+          ? "Spend under ${reminder['spending_goal']} on ${reminder['category_name']} until ${reminder['end_date']}"
+          : "Spend under ${reminder['spending_goal']} until ${reminder['end_date']}";
+    }
+
     return Container(
       padding: EdgeInsets.all(5),
       child: Column(
@@ -359,7 +396,9 @@ class ReminderInd extends StatelessWidget {
               ),
             ),
             child: Text(
-              reminder['content'] ?? "",
+              goalText != ""
+                  ? "${reminder['content']}\n$goalText"
+                  : (reminder['content'] ?? ""),
               style: TextStyle(
                 fontSize: 16,
                 color: AppStyles.textColor,

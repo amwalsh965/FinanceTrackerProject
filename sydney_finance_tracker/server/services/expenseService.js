@@ -6,7 +6,7 @@ class ExpenseService {
     }
 
     async get(ids = []) {
-        let query = 'SELECT * FROM expenses';
+        let query = 'SELECT e.id, e.amount, e.purchase, e.note, e.date, c.id AS category_id, c.name AS category_name FROM expenses e LEFT JOIN categories c ON e.category_id = c.id ORDER BY e.date DESC';
         const request = this.pool.request();
         if (ids.length > 0) {
             query += ` WHERE id IN (${ids.map((_, i) => `@id${i}`).join(',')})`;
@@ -14,33 +14,33 @@ class ExpenseService {
         }
 
         const result = await request.query(query);
-        return result.recordset;
+        return result.recordset ?? [];
     }
 
     async add(expense) {
-        const {amount, purchase, category, note, date } = expense;
+        const {amount, purchase, category_id, note, date} = expense;
         const result = await this.pool.request()
             .input("amount", sql.Float, amount)
             .input("purchase", sql.VarChar(255), purchase)
-            .input("category", sql.VarChar, category)
+            .input("category_id", sql.Int, category_id)
             .input("note", sql.VarChar, note)
             .input("date", sql.DateTime, new Date(date))
-            .query("INSERT INTO expenses (amount, purchase, category, note, date) OUTPUT INSERTED.* VALUES (@amount, @purchase, @category, @note, @date)");
+            .query("INSERT INTO expenses (amount, purchase, category_id, note, date) OUTPUT INSERTED.* VALUES (@amount, @purchase, @category_id, @note, @date)");
             return result.recordset[0];
 
     }
 
     async update(id, expense) {
-        const {amount, purchase, category, note, date } = expense;
+        const {amount, purchase, category_id, note, date } = expense;
         const result = await this.pool.request()
         .input('id', sql.Int, id)
         .input('amount', sql.Float, amount)
         .input('purchase', sql.VarChar(255), purchase)
-        .input('category', sql.VarChar, category)
+        .input('category_id', sql.Int, category_id)
         .input('note', sql.VarChar, note)
         .input('date', sql.DateTime, date)
         .query(`UPDATE expenses
-            SET amount=@amount, purchase=@purchase, category=@category, note=@note, date=@date OUTPUT INSERTED.* WHERE id=@id; SELECT * FROM expenses WHERE id=@id;`
+            SET amount=@amount, purchase=@purchase, category_id=@category_id, note=@note, date=@date OUTPUT INSERTED.* WHERE id=@id; SELECT * FROM expenses WHERE id=@id;`
         );
         return result.recordset[0];
     }

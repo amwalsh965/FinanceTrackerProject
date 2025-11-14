@@ -7,7 +7,9 @@ class ReminderService {
 
     async get(ids = []) {
         console.log("GET");
-        let query = 'SELECT * FROM reminders';
+        let query = `SELECT r.id, r.title, r.content, g.id AS 
+        goal_id, g.spending_goal AS spending_goal, g.end_date AS end_date, c.id AS category_id, c.name AS category_name FROM reminders r LEFT JOIN goals g ON r.goal_id = g.id
+        LEFT JOIN categories c ON g.category_id = c.id ORDER BY r.id`;
         const request = this.pool.request();
 
         if (ids.length > 0) {
@@ -16,16 +18,17 @@ class ReminderService {
         }
         
         const result = await request.query(query);
-        return result.recordset;
+        return result.recordset ?? [];
     }
 
     async add(reminder) {
-        const { title, content } = reminder;
+        const { title, content, goal_id } = reminder;
         console.log("Add");
         const result = await this.pool.request()
             .input('title', sql.NVarChar(225), title)
             .input('content', sql.NVarChar(225), content)
-            .query('INSERT INTO reminders (title, content) OUTPUT INSERTED.* VALUES (@title, @content);');
+            .input('goal_id', sql.Int, goal_id)
+            .query('INSERT INTO reminders (title, content, goal_id) OUTPUT INSERTED.* VALUES (@title, @content, @goal_id);');
         console.log(result);
         console.log(result.recordset)
         return result.recordset[0];
@@ -37,9 +40,10 @@ class ReminderService {
         .input('id', sql.Int, id)
         .input('title', sql.NVarChar(sql.MAX), title)
         .input('content', sql.NVarChar(sql.MAX), content)
+        .input('goal_id', sql.Int, goal_id)
         .query(`
             UPDATE reminders
-            SET title=@title, content=@content WHERE id=@id;
+            SET title=@title, content=@content, goal_id=@goal_id WHERE id=@id;
             SELECT * FROM reminders WHERE id=@id`);
         return result.recordset[0];
     }

@@ -3,6 +3,8 @@ const cors = require("cors");
 const sql = require('mssql');
 const ExpenseService = require('./services/expenseService');
 const ReminderService = require('./services/reminderService');
+const GoalService = require('./services/goalService');
+const CategoryService = require('./services/categoryService');
 
 const app = express();
 app.use(cors());
@@ -26,6 +28,8 @@ sql.connect(config).then(pool => {
 
     const expenseService = new ExpenseService(pool);
     const reminderService = new ReminderService(pool);
+    const goalService = new GoalService(pool);
+    const categoryService = new CategoryService(pool);
 
     app.get('/expenses', async (req, res) => {
         try {
@@ -95,6 +99,61 @@ sql.connect(config).then(pool => {
         try {
             const ids = req.body.ids || [];
             await reminderService.delete(ids);
+            res.sendStatus(204);
+        } catch(err) { res.status(500).send(err.message); }
+    });
+
+    //goals
+    app.get('/goals', async (req, res) => {
+        try {
+            const ids = req.query.ids ? req.query.ids.split(',').map(id => parseInt(id)) : [];
+            const goals = await goalService.get(ids);
+            res.json(goals);
+        } catch(err) { res.status(500).send(err.message); }
+    });
+
+    app.post('/goals', async (req, res) => {
+        try {
+            const goal = await goalService.add(req.body);
+            res.json(goal);
+        } catch(err) { res.status(500).send(err.message); }
+    });
+
+    app.put('/goals/:id', async (req, res) => {
+        try {
+            const updated = await goalService.update(req.params.id, req.body);
+            res.json(updated);
+        } catch(err) { res.status(500).send(err.message);}
+    });
+
+    app.delete('/goals', async (req, res) => {
+        try {
+            const ids = req.body.ids || [];
+            await goalService.delete(ids);
+            res.sendStatus(204);
+        } catch(err) { res.status(500).send(err.message); }
+    });
+
+    //category
+    app.get('/categories', async (req, res) => {
+        try {
+            const ids = req.query.ids ? req.query.ids.split(',').map(id => parseInt(id)) : [];
+            const categories = await categoryService.get(ids);
+            res.json(categories);
+        } catch(err) { res.status(500).send(err.message); }
+    });
+
+    app.post('/categories', async (req, res) => {
+        try {
+            const category = await categoryService.add(req.body);
+            res.json(category);
+        } catch(err) { res.status(500).send(err.message); }
+    });
+
+    app.delete('/categories', async (req, res) => {
+        try {
+            const ids = req.body.ids || [];
+            await categoryService.delete(ids);
             res.sendStatus(204);
         } catch(err) { res.status(500).send(err.message); }
     });

@@ -132,4 +132,116 @@ class ApiService {
       throw Exception('Failed to delete reminder');
     }
   }
+
+  //Categories
+  Future<List<Map<String, dynamic>>> getCategories(List<int>? ids) async {
+    var url = '$baseUrl/categories';
+    final uri = Uri.parse(url).replace(queryParameters: {
+      if (ids != null && ids.isNotEmpty) 'ids': ids.join(','),
+    });
+
+    final response = await http.get(uri);
+
+    print(response.statusCode);
+
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+      return data.cast<Map<String, dynamic>>();
+    } else {
+      throw Exception('Failed to load categories');
+    }
+  }
+
+  Future<Map<String, dynamic>> addCategory(
+      Map<String, dynamic> category) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/categories'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({...category}),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to add category');
+    }
+  }
+
+  Future<void> deleteCategories(List<int>? ids) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/categories'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'ids': ids ?? []}),
+    );
+
+    if (response.statusCode != 204) {
+      throw Exception('Failed to delete category');
+    }
+  }
+
+  //Goals
+  Future<List<Map<String, dynamic>>> getGoals(List<int>? ids) async {
+    var url = '$baseUrl/goals';
+    final uri = Uri.parse(url).replace(queryParameters: {
+      if (ids != null && ids.isNotEmpty) 'ids': ids.join(','),
+    });
+
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+      return data.cast<Map<String, dynamic>>();
+    } else {
+      throw Exception('Failed to load expenses');
+    }
+  }
+
+  Future<Map<String, dynamic>> addGoal(Map<String, dynamic> goal) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/goals'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        ...goal,
+        'date': goal['end_date'] is String
+            ? (goal['end_date']).toIso8601String()
+            : goal['end_date'],
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to add goal');
+    }
+  }
+
+  Future<Map<String, dynamic>> updateGoal(Map<String, dynamic> goal) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/goals/${goal["id"]}'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        ...goal,
+        'date': goal['end_date'] is String
+            ? (goal['end_date']).toIso8601String()
+            : goal['end_date'],
+      }),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to update goal');
+    }
+  }
+
+  Future<void> deleteGoals(List<int>? ids) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/goals'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'ids': ids ?? []}),
+    );
+
+    if (response.statusCode != 204) {
+      throw Exception('Failed to delete goal');
+    }
+  }
 }

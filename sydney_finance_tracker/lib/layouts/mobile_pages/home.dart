@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sydney_finance_tracker/layouts/mobile_pages/goal.dart';
 import 'package:sydney_finance_tracker/layouts/mobile_pages/graph.dart';
 import 'package:sydney_finance_tracker/layouts/mobile_pages/reminder.dart';
 import 'package:sydney_finance_tracker/layouts/mobile_pages/tracker.dart';
@@ -135,8 +136,9 @@ class _HomeState extends State<Home> {
               context,
               label: "Goals",
               icon: Icons.menu_book_rounded,
-              onPressed: () {
-                print("Mobile Button Tapped");
+              onPressed: () async {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => GoalsPage()));
               },
             ),
             _buildResponsiveBtn(
