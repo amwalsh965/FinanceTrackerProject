@@ -355,8 +355,8 @@ class ReminderInd extends StatelessWidget {
   Widget build(BuildContext context) {
     String goalText = "";
     if (reminder["spending_goal"] != null) {
-      goalText = reminder["category_id"]
-          ? "Spend under ${reminder['spending_goal']} on ${reminder['category_name']} until ${reminder['end_date']}"
+      goalText = reminder["category_id"] != null
+          ? "\nSpend under ${reminder['spending_goal']} on ${reminder['category_name']} until ${DateTime.parse(reminder['end_date']).toLocal().month}/${DateTime.parse(reminder['end_date']).toLocal().day}/${DateTime.parse(reminder['end_date']).toLocal().year}"
           : "Spend under ${reminder['spending_goal']} until ${reminder['end_date']}";
     }
 

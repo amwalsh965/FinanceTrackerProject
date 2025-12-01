@@ -98,14 +98,19 @@ class _TrackerState extends State<Tracker> {
     final amount = double.tryParse(_amountController.text);
     if (amount == null) return;
 
+    print("SelectedCategory: $_selectedCategory");
+    print("a ${int.tryParse(_selectedCategory!)}");
+    print(_selectedCategory != null);
     final Map<String, dynamic> expense = {
       "amount": amount,
       "purchase": _purchaseController.text,
-      "category":
+      "category_id":
           _selectedCategory != null ? int.tryParse(_selectedCategory!) : null,
       "note": _noteController.text,
       "date": DateTime.now()
     };
+
+    print(expense["category"]);
 
     await api.addExpense(expense);
 
@@ -130,10 +135,12 @@ class _TrackerState extends State<Tracker> {
   }
 
   void _applyFilters() {
+    print(_filterCategory);
     setState(() {
       filteredExpenses = expenses.where((e) {
-        final matchesCategory =
-            _filterCategory == null || e['category_id'] == _filterCategory;
+        print(e['category_id']);
+        final matchesCategory = _filterCategory == null ||
+            e['category_id'] == int.tryParse(_filterCategory!);
         final matchesSearch = _searchController.text.isEmpty ||
             e['purchase']
                 .toLowerCase()
@@ -260,7 +267,7 @@ class _TrackerState extends State<Tracker> {
                               )),
                         ],
                         onChanged: (value) {
-                          _filterCategory = value!;
+                          _filterCategory = value;
                           _applyFilters();
                         },
                         decoration: const InputDecoration(
@@ -335,7 +342,7 @@ class _TrackerState extends State<Tracker> {
                 ),
               ),
               const SizedBox(height: 20),
-              if (filteredExpenses != [])
+              if (filteredExpenses.isNotEmpty)
                 ListView.builder(
                   itemCount: filteredExpenses.length,
                   shrinkWrap: true,
@@ -343,61 +350,98 @@ class _TrackerState extends State<Tracker> {
                   itemBuilder: (context, index) {
                     final e = filteredExpenses[index];
                     final isEditing = _editingTrackerId == e['id'];
-                    ;
 
                     return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: ListTile(
-                        leading:
-                            CircleAvatar(child: Text(e['category_name'] ?? "")),
-                        title: isEditing
-                            ? TextField(
-                                controller:
-                                    TextEditingController(text: e['purchase']),
-                                onChanged: (val) => e['purchase'] = val,
-                                decoration: const InputDecoration(
-                                    labelText: "Purchase"),
-                              )
-                            : Text(
-                                "${e['category_name'] ?? ""} - ${e['purchase']} - \$${e['amount'].toStringAsFixed(2)}"),
-                        subtitle: isEditing
-                            ? TextField(
-                                controller: TextEditingController(
-                                    text: e['note'] ?? ''),
-                                onChanged: (val) => e['note'] = val,
-                                decoration:
-                                    const InputDecoration(labelText: "Note"),
-                              )
-                            : Text(e['note'] ?? ''),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (isEditing)
-                              IconButton(
-                                icon: const Icon(Icons.check,
-                                    color: Colors.green),
-                                onPressed: () async {
-                                  await _updateExpense(e);
-                                },
-                              )
-                            else
-                              IconButton(
-                                icon: const Icon(Icons.edit,
-                                    color: Colors.blueAccent),
-                                onPressed: () {
-                                  setState(() => _editingTrackerId = e['id']);
-                                },
-                              ),
-                            IconButton(
-                              icon: const Icon(Icons.delete,
-                                  color: Colors.redAccent),
-                              onPressed: () => {_deleteExpenses(e['id'])},
+                      margin: const EdgeInsets.symmetric(vertical: 6),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            // Optional tap action
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Leading CircleAvatar
+                                CircleAvatar(
+                                  child: Text(
+                                      (e['category_name']?.isNotEmpty == true)
+                                          ? e['category_name'][0].toUpperCase()
+                                          : ""),
+                                ),
+                                const SizedBox(width: 16),
+
+                                // Middle: title + subtitle
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "${e['category_name'] ?? ""} - ${e['purchase']} - \$${e['amount'].toStringAsFixed(2)}",
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        e['note'] ?? '',
+                                        style: const TextStyle(
+                                            color: Colors.black54),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                // Trailing buttons + date
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        if (isEditing)
+                                          IconButton(
+                                            padding: EdgeInsets.zero,
+                                            constraints: const BoxConstraints(),
+                                            icon: const Icon(Icons.check,
+                                                color: Colors.green),
+                                            onPressed: () async =>
+                                                await _updateExpense(e),
+                                          )
+                                        else
+                                          IconButton(
+                                            padding: EdgeInsets.zero,
+                                            constraints: const BoxConstraints(),
+                                            icon: const Icon(Icons.edit,
+                                                color: Colors.blueAccent),
+                                            onPressed: () => setState(() =>
+                                                _editingTrackerId = e['id']),
+                                          ),
+                                        IconButton(
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
+                                          icon: const Icon(Icons.delete,
+                                              color: Colors.redAccent),
+                                          onPressed: () =>
+                                              _deleteExpenses(e['id']),
+                                        ),
+                                      ],
+                                    ),
+                                    Text(
+                                      "${DateTime.parse(e['date']).toLocal().month}/${DateTime.parse(e['date']).toLocal().day}/${DateTime.parse(e['date']).toLocal().year}",
+                                      style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.grey[600]),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                            if (e['date'] is String)
-                              Text(
-                                  "${e['date'] is String ? DateTime.parse(e['date']).toLocal().month : e['date'].toLocal().month}/${e['date'] is String ? DateTime.parse(e['date']).toLocal().day : e['date'].toLocal().day}/${e['date'] is String ? DateTime.parse(e['date']).toLocal().year : e['date'].toLocal().year}",
-                                  style: TextStyle(color: Colors.grey[600])),
-                          ],
+                          ),
                         ),
                       ),
                     );

@@ -54,7 +54,7 @@ class _GraphsPageState extends State<GraphsPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            const Text("Cumulative Spending (Month/Year)",
+            const Text("Cumulative Spending (Year)",
                 style: TextStyle(fontSize: 18)),
             const SizedBox(height: 16),
             if (cumulativeData.isEmpty)
@@ -80,6 +80,15 @@ class _GraphsPageState extends State<GraphsPage> {
     double maxY = spots.map((s) => s.y).reduce((a, b) => a > b ? a : b);
     if (maxY <= 0 || maxY.isNaN) maxY = 1;
 
+    int labelCount = 10;
+    List<int> labelIndicies = [];
+    if (data.length <= labelCount) {
+      labelIndicies = List.generate(data.length, (i) => i);
+    } else {
+      labelIndicies = List.generate(labelCount,
+          (i) => (i * (data.length - 1) / (labelCount - 1)).round());
+    }
+
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -100,7 +109,7 @@ class _GraphsPageState extends State<GraphsPage> {
                   spots: spots,
                   barWidth: 3,
                   color: Colors.blue,
-                  dotData: const FlDotData(show: true),
+                  dotData: const FlDotData(show: false),
                   belowBarData: BarAreaData(show: true, color: Colors.blue),
                 ),
               ],
@@ -117,6 +126,8 @@ class _GraphsPageState extends State<GraphsPage> {
                         );
                       }),
                 ),
+                topTitles:
+                    AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 rightTitles:
                     AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 bottomTitles: AxisTitles(
@@ -125,11 +136,14 @@ class _GraphsPageState extends State<GraphsPage> {
                       interval: 1,
                       getTitlesWidget: (value, meta) {
                         int index = value.toInt();
-                        if (index < 0 || index >= data.length) {
+                        if (!labelIndicies.contains(index) ||
+                            index < 0 ||
+                            index >= data.length) {
                           return Container();
                         }
+                        final date = data[index].date;
                         return Text(
-                          data[index].date.day.toString(),
+                          "${date.month}/${date.day}",
                           style: const TextStyle(fontSize: 10),
                         );
                       }),

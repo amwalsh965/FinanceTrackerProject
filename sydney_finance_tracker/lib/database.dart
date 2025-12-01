@@ -21,6 +21,7 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> addExpense(Map<String, dynamic> expense) async {
+    print(expense);
     final response = await http.post(
       Uri.parse('$baseUrl/expenses'),
       headers: {'Content-Type': 'application/json'},
@@ -197,14 +198,12 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> addGoal(Map<String, dynamic> goal) async {
+    print("Goal: $goal");
     final response = await http.post(
       Uri.parse('$baseUrl/goals'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         ...goal,
-        'date': goal['end_date'] is String
-            ? (goal['end_date']).toIso8601String()
-            : goal['end_date'],
       }),
     );
 

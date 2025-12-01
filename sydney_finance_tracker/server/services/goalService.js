@@ -39,7 +39,7 @@ class GoalService {
 
     async get(ids = []) {
         console.log("GET");
-        let query = 'SELECT g.id, g.spending_goal, g.reoccuring, g.duration_type, g.custom_duration, c.id AS category_id, c.name FROM goals g LEFT JOIN categories c ON g.category_id = c.id ORDER BY g.id';
+        let query = 'SELECT g.id, g.spending_goal, g.reoccuring, g.end_date, g.duration_type, g.custom_duration, c.id AS category_id, c.name FROM goals g LEFT JOIN categories c ON g.category_id = c.id ORDER BY g.id';
         const request = this.pool.request();
 
         if (ids.length > 0) {
@@ -52,7 +52,10 @@ class GoalService {
     }
 
     async add(goal) {
-        const { category_id, spending_goal, reoccuring, duration_type, custom_duration } = goal;
+        console.log(goal);
+        const { category_id, spending_goal, reoccuring, duration_type, custom_duration} = goal;
+
+        
 
         const end_date = this.calculateEndDate(duration_type, custom_duration);
         console.log("Add");

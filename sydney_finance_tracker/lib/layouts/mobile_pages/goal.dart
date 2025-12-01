@@ -169,6 +169,7 @@ class _GoalsPageState extends State<GoalsPage> {
                 physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
                   final g = goals[index];
+                  print(g);
                   final isEditing = _editingGoalId == g['id'];
 
                   if (isEditing) {
@@ -266,7 +267,7 @@ class _GoalsPageState extends State<GoalsPage> {
                     child: ListTile(
                       title: Text("${g['name']} - \$${g['spending_goal']}"),
                       subtitle: Text(
-                          "Duration: ${g['duration_type']}${g['duration_type'] == 'custom' ? '(${g['custom_duration']} days)' : ''}\nEnd: ${g['end_date'] is String ? DateTime.parse(g['end_date']).toLocal().month : ""}/${g['end_date'] is String ? DateTime.parse(g['end_date']).toLocal().day : ""}/${g['end_date'] is String ? DateTime.parse(g['end_date']).toLocal().year : ""}"),
+                          "Duration: ${g['duration_type']}${g['duration_type'] == 'custom' ? '(${g['custom_duration']} days)' : ''}\nEnd: ${DateTime.parse(g['end_date']).toLocal().month}/${DateTime.parse(g['end_date']).toLocal().day}/${DateTime.parse(g['end_date']).toLocal().year}"),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
                         onPressed: () => {_deleteGoal(g['id'])},

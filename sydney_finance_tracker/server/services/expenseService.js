@@ -19,6 +19,7 @@ class ExpenseService {
 
     async add(expense) {
         const {amount, purchase, category_id, note, date} = expense;
+        console.log(`category_id: ${category_id}`);
         const result = await this.pool.request()
             .input("amount", sql.Float, amount)
             .input("purchase", sql.VarChar(255), purchase)
